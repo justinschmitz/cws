@@ -5,54 +5,48 @@
 #include "include/keywords.h"
 
 static unsigned int keywords_get_next_index () {
-  unsigned int i;
-  for (i = 0; i < MAX_KEYWORD_LIST_SIZE; i++)
+  unsigned int index;
+  for (index = 0; index < MAX_KEYWORD_LIST_SIZE; index++)
     {
-      if (keywords[i] == (keyword_t) 0x0)
+      if (keywords[index] == (keyword_t) 0x0)
 	{
-	  return i;
+	  return index;
 	}
     }
 
-  return 0;
+  return (unsigned int) 0;
 }
 
-keyword_t find_keyword(const char *word) {
-  unsigned int i;
-  for (i = 0; i < MAX_KEYWORD_LIST_SIZE; i++)
+static void print_keyword (keyword_t keyword) {
+  if (keyword)
     {
-      if (keywords[i] != (keyword_t) 0x0)
+      if (keyword->word)
 	{
-	  if (keywords[i]->word == word)
-	    {
-	      return keywords[i];
-	    }
+	  printf("%d %s\n", keyword->count, keyword->word);
 	}
     }
-
-  return (keyword_t) 0x0;
 }
 
 keyword_t add_keyword (const char *word) {
-  
   if (!word)
     {
       return (keyword_t) 0x0;
     }
-
-  printf("Debug: condition->(!word) passed\n");
   
   const unsigned int current_keyword_index =	\
     keywords_get_next_index ();
-
+  
   if (current_keyword_index > MAX_KEYWORD_LIST_SIZE-1)
     {
       return (keyword_t) 0x0;      
     }
 
-  if (!find_keyword(word)) 
+  keyword_t keyword = find_keyword(word);
+
+  if (keyword)
     {
-      return (keyword_t) 0x0;
+      keyword->count++;
+      return keyword;
     }
 
   keywords[current_keyword_index] =		\
@@ -65,4 +59,48 @@ keyword_t add_keyword (const char *word) {
     }
 
   return keywords[current_keyword_index];
+}
+
+keyword_t find_keyword(const char *word) {
+  if (!word)
+    {
+      return (keyword_t) 0x0;
+    }
+  
+  unsigned int index;
+  for (index = 0; index < MAX_KEYWORD_LIST_SIZE; index++)
+    {
+      if (keywords[index] != (keyword_t) 0x0)
+	{
+	  if (keywords[index]->word == word)
+	    {
+	      return keywords[index];
+	    }
+	}
+    }
+
+  return (keyword_t) 0x0;
+}
+
+void print_keywords(void) {
+  unsigned int index;
+  for (index = 0; index < MAX_KEYWORD_LIST_SIZE; index++)
+    {
+      if (keywords[index] != (keyword_t) 0x0)
+	{
+	  print_keyword(keywords[index]);
+	}
+    }
+}
+
+void clean_keywords(void) {
+  unsigned int index;
+  for (index = 0; index < MAX_KEYWORD_LIST_SIZE; index++)
+    {
+      if (keywords[index] != (keyword_t) 0x0)
+	{
+	  free(keywords[index]);
+	  keywords[index] = (keyword_t) 0x0;
+	}
+    }
 }
